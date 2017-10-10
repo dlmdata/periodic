@@ -45,11 +45,11 @@ func main() {
 	task := periodic.NewTask(500*time.Millisecond, periodic.TaskFunc(sayGoodbyeThreeTimes))
 	defer task.Stop()
 
-	// log errors from background task
+	// terminate on background task error
 	go func() {
 		for err := range task.Error {
 			if err != nil {
-				log.Println("error:", err)
+				log.Fatalln("error:", err)
 			}
 		}
 	}()
