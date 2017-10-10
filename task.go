@@ -6,16 +6,19 @@ import (
 	"time"
 )
 
+// Execer is the interface that wraps the Exec method.
 type Execer interface {
 	Exec() error
 }
 
+// TaskFunc is an adapter to allow the use of a regular function as an Execer.
 type TaskFunc func() error
 
 func (f TaskFunc) Exec() error {
 	return f()
 }
 
+// Task executes a function at regular intervals.
 type Task struct {
 	Error   <-chan error
 	task    Execer
@@ -25,6 +28,7 @@ type Task struct {
 	running bool
 }
 
+// NewTask returns a new Task that executes the given task with the given period.
 func NewTask(period time.Duration, task Execer) *Task {
 	if period <= 0 {
 		panic(errors.New("period must be positive"))
@@ -41,12 +45,14 @@ func NewTask(period time.Duration, task Execer) *Task {
 	return t
 }
 
+// Running returns true if and only if the task has not been stopped.
 func (t *Task) Running() bool {
 	t.mutex.RLock()
 	defer t.mutex.RUnlock()
 	return t.running
 }
 
+// Stop blocks until the task has ended and prevents further invocations.
 func (t *Task) Stop() {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
@@ -73,6 +79,7 @@ func (t *Task) start(errors chan error) {
 	}
 }
 
+// Background is a convenience function that executes the given task with the given period.
 func Background(period time.Duration, task Execer) <-chan error {
 	if period <= 0 {
 		return nil
