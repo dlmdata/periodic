@@ -45,13 +45,6 @@ func NewTask(period time.Duration, task Execer) *Task {
 	return t
 }
 
-// Running returns true if and only if the task has not been stopped.
-func (t *Task) Running() bool {
-	t.mutex.RLock()
-	defer t.mutex.RUnlock()
-	return t.running
-}
-
 // Stop blocks until the task has ended and prevents further invocations.
 func (t *Task) Stop() {
 	t.mutex.Lock()
@@ -66,6 +59,7 @@ func (t *Task) start(errors chan error) {
 	for {
 		select {
 		case msg := <-t.stop:
+			close(errors)
 			t.running = false
 			t.stop <- msg
 			return
