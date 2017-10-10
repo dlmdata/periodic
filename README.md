@@ -1,2 +1,2 @@
 # periodic
-Perform a task at regular intervals
+Perform tasks at regular intervals
